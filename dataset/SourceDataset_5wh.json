@@ -1,0 +1,27 @@
+{
+	"name": "SourceDataset_5wh",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage2jr",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cw_folderPath": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@dataset().cw_folderPath",
+					"type": "Expression"
+				},
+				"fileSystem": "prb1"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

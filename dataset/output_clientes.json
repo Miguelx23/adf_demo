@@ -1,0 +1,39 @@
+{
+	"name": "output_clientes",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "linkedSQLDBCLiente",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "nombre",
+				"type": "varchar"
+			},
+			{
+				"name": "Departamento",
+				"type": "varchar"
+			},
+			{
+				"name": "Funcion",
+				"type": "varchar"
+			},
+			{
+				"name": "estatus",
+				"type": "varchar"
+			},
+			{
+				"name": "sueldo",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "excelcliente"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

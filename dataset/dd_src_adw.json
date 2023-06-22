@@ -1,0 +1,13 @@
+{
+	"name": "dd_src_adw",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DD_AdventureWork",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

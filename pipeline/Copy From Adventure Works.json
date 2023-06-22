@@ -1,0 +1,148 @@
+{
+	"name": "Copy From Adventure Works",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach pendejo",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.cw_items",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy Full Table",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "@{item().source.schema}.@{item().source.table}"
+								}
+							],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings",
+										"blockSizeInMB": 10
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"maxRowsPerFile": 1000,
+										"fileNamePrefix": {
+											"value": "@item().source.table",
+											"type": "Expression"
+										},
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"validateDataConsistency": false
+							},
+							"inputs": [
+								{
+									"referenceName": "AdventureWorks2019",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_schema": "@item().source.schema",
+										"cw_table": "@item().source.table"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DataLakeDataArmy",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_schemaName": {
+											"value": "@item().source.schema",
+											"type": "Expression"
+										},
+										"cw_tableName": {
+											"value": "@item().source.table",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"cw_items": {
+				"type": "Array",
+				"defaultValue": [
+					{
+						"source": {
+							"schema": "Person",
+							"table": "Person"
+						}
+					},
+					{
+						"source": {
+							"schema": "Production",
+							"table": "Product"
+						}
+					},
+					{
+						"source": {
+							"schema": "Production",
+							"table": "ProductCategory"
+						}
+					},
+					{
+						"source": {
+							"schema": "Production",
+							"table": "ProductSubcategory"
+						}
+					},
+					{
+						"source": {
+							"schema": "Sales",
+							"table": "Customer"
+						}
+					},
+					{
+						"source": {
+							"schema": "Sales",
+							"table": "SalesOrderDetail"
+						}
+					},
+					{
+						"source": {
+							"schema": "Sales",
+							"table": "SalesOrderHeader"
+						}
+					},
+					{
+						"source": {
+							"schema": "Sales",
+							"table": "SalesTerritory"
+						}
+					}
+				]
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-10-09T09:56:22Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

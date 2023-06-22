@@ -1,0 +1,25 @@
+{
+	"name": "InabieProduccion",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LinkServiceINABIEProduccion",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TableNameProduction": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": {
+				"value": "@dataset().TableNameProduction",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

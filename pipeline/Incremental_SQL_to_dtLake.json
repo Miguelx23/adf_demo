@@ -1,0 +1,184 @@
+{
+	"name": "Incremental_SQL_to_dtLake",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lee la tabla config",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT \n[ID]\n,[LoadType]\n,[Source]\n,[Colunms]\n,[WaterMArkValue]\n,WaterMarkColumn\nFROM [AdventureWorks2019].[dbo].[ConfigurationTable] \nWHERE [Enabled]=1",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "LocalDestinationJr",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableName": "dummy"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Carga Parcial",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Lee la tabla config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('lee la tabla config').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(item().LoadType,'Parcial')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Carga Parcial",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Carga Parcial').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Busca Max Watermark",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "SELECT\n     MAX(@{item().WaterMarkColumn}) AS WatermarkDate\nFROM\n     @{item().source}",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "LocalDestinationJr",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableName": "dummy"
+									}
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "Carga Data Parcial",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Busca Max Watermark",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "SELECT \n        @{item().Colunms}\nFROM\n        @{item().source}\nWHERE \n        @{item().WaterMarkColumn} > '@{item().WaterMArkValue}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "LocalDestinationJr",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableName": "dummy"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "destinationjrcsv",
+									"type": "DatasetReference"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "ADL-to-ADL_jr"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-03-14T16:31:07Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

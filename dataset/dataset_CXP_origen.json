@@ -1,0 +1,248 @@
+{
+	"name": "dataset_CXP_origen",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLS_CXC",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": "Sheet1",
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "CuentasPorPagar.xlsx",
+				"folderPath": "cuentasXpagar",
+				"container": "cxp"
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": [
+			{
+				"name": "Status",
+				"type": "String"
+			},
+			{
+				"name": "NoDocumento",
+				"type": "String"
+			},
+			{
+				"name": "ClaseDocumento",
+				"type": "String"
+			},
+			{
+				"name": "FechaCreacionRegistro",
+				"type": "String"
+			},
+			{
+				"name": "FechaContabilizacion",
+				"type": "String"
+			},
+			{
+				"name": "FechaDocumento",
+				"type": "String"
+			},
+			{
+				"name": "Ejercicio",
+				"type": "String"
+			},
+			{
+				"name": "Periodo",
+				"type": "String"
+			},
+			{
+				"name": "DocCompensacion",
+				"type": "String"
+			},
+			{
+				"name": "FechaCompensacion",
+				"type": "String"
+			},
+			{
+				"name": "Asignacion",
+				"type": "String"
+			},
+			{
+				"name": "Referencia",
+				"type": "String"
+			},
+			{
+				"name": "ClaveContabilizacion",
+				"type": "String"
+			},
+			{
+				"name": "IndicadorCME",
+				"type": "String"
+			},
+			{
+				"name": "IndDebe_Haber",
+				"type": "String"
+			},
+			{
+				"name": "DescIndDebe_Haber",
+				"type": "String"
+			},
+			{
+				"name": "IndicadorImpuesto",
+				"type": "String"
+			},
+			{
+				"name": "TipoNIF",
+				"type": "String"
+			},
+			{
+				"name": "DescTipoNIF",
+				"type": "String"
+			},
+			{
+				"name": "PersonaFisica",
+				"type": "String"
+			},
+			{
+				"name": "SujetoImpuesto",
+				"type": "String"
+			},
+			{
+				"name": "GrupoCuenta",
+				"type": "String"
+			},
+			{
+				"name": "NoIdentificacionFiscal",
+				"type": "String"
+			},
+			{
+				"name": "CodProveedor",
+				"type": "String"
+			},
+			{
+				"name": "NomProveedor",
+				"type": "String"
+			},
+			{
+				"name": "ImporteML",
+				"type": "String"
+			},
+			{
+				"name": "MonedaML",
+				"type": "String"
+			},
+			{
+				"name": "ImporteMD",
+				"type": "String"
+			},
+			{
+				"name": "MonedaMD",
+				"type": "String"
+			},
+			{
+				"name": "TasaCambio",
+				"type": "String"
+			},
+			{
+				"name": "Texto",
+				"type": "String"
+			},
+			{
+				"name": "Orden",
+				"type": "String"
+			},
+			{
+				"name": "ActivoFijo",
+				"type": "String"
+			},
+			{
+				"name": "NoCuetaContable",
+				"type": "String"
+			},
+			{
+				"name": "NombreCuetaContable",
+				"type": "String"
+			},
+			{
+				"name": "FechaBaseVenc",
+				"type": "String"
+			},
+			{
+				"name": "FechaVencNeto",
+				"type": "String"
+			},
+			{
+				"name": "Demora",
+				"type": "String"
+			},
+			{
+				"name": "RangosVencimiento",
+				"type": "String"
+			},
+			{
+				"name": "HabitoPago",
+				"type": "String"
+			},
+			{
+				"name": "CondPago",
+				"type": "String"
+			},
+			{
+				"name": "DescCondPago",
+				"type": "String"
+			},
+			{
+				"name": "DiasDPP1",
+				"type": "String"
+			},
+			{
+				"name": "DiasDPP2",
+				"type": "String"
+			},
+			{
+				"name": "PlazoCondPagoNeto",
+				"type": "String"
+			},
+			{
+				"name": "PorcentajeDPP1",
+				"type": "String"
+			},
+			{
+				"name": "PorcentajeDPP2",
+				"type": "String"
+			},
+			{
+				"name": "ImporteDerechoDescuentoMD",
+				"type": "String"
+			},
+			{
+				"name": "ImporteDescuentoML",
+				"type": "String"
+			},
+			{
+				"name": "ViaPago",
+				"type": "String"
+			},
+			{
+				"name": "ClaveBloqueoPago",
+				"type": "String"
+			},
+			{
+				"name": "CondPagoFija",
+				"type": "String"
+			},
+			{
+				"name": "RefFactura",
+				"type": "String"
+			},
+			{
+				"name": "BloqueoReclamacion",
+				"type": "String"
+			},
+			{
+				"name": "ClaveReclamacion",
+				"type": "String"
+			},
+			{
+				"name": "PosPresupuestaria",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

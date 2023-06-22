@@ -1,0 +1,7 @@
+{
+	"name": "ILocal-IR",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "SHIR to Lilys PC"
+	}
+}

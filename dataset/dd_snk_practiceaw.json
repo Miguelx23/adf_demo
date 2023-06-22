@@ -1,0 +1,17 @@
+{
+	"name": "dd_snk_practiceaw",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DD_PracticeAw",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "aw",
+			"table": "Departament"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

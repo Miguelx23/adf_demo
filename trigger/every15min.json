@@ -1,0 +1,42 @@
+{
+	"name": "every15min",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2021-09-28T18:26:00",
+				"timeZone": "Pacific Standard Time",
+				"schedule": {
+					"minutes": [
+						4,
+						19,
+						34,
+						49
+					],
+					"hours": [
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						7,
+						8,
+						18,
+						19,
+						20,
+						21
+					]
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,250 @@
+{
+	"name": "Load_Example_Incremental",
+	"properties": {
+		"description": "Se debe poner el nombre del esquema de configuracion.\n",
+		"activities": [
+			{
+				"name": "Get ConfigTable",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT  id, NameDataset, SourceTable, SinkTable, [Column], WatermarkColum, WatermarkValueDatetime, Enable\nFROM @{pipeline().parameters.ConfigTable}\nwhere Enable =1\nIF @@ROWCOUNT = 0 THROW 50000,'No rows in configuration table!',1",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "D_SalesLT",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableSource": {
+								"value": "dummy.dummy\n",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Get Filter ConfigTable",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Get ConfigTable",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get ConfigTable').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(item().NameDataset,'D_SalesLT')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEach Filter ConfigTable",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Filter ConfigTable",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get ConfigTable').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy BikeStores",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "GET  MAX BikeStore",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "\nSELECT \n @{item().Column} \n FROM @{item().SourceTable} \n\n\nWHERE\n\n @{item().WatermarkColum} > convert(varchar, '@{item().WatermarkValueDateTime}', 20)\nAND \n@{item().WatermarkColum} <= convert(varchar, '@{activity('GET  MAX BikeStore').output.firstRow.MAXD}', 20)\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"preCopyScript": {
+										"value": "TRUNCATE TABLE @{item().SinkTable}",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "D_SalesLT",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableSource": {
+											"value": "@{item().SourceTable}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "D_SalesSink",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableSink": {
+											"value": "@{item().SinkTable}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "GET  MAX BikeStore",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT MAX (@{item().WatermarkColum}) as maxd \nFROM @{item().SourceTable} ",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "D_SalesLT",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableSource": {
+											"value": "@{item().SourceTable}",
+											"type": "Expression"
+										}
+									}
+								}
+							}
+						},
+						{
+							"name": "Update Stored procedure",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy BikeStores",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "Configuration.UpdateWaterMarkValue",
+								"storedProcedureParameters": {
+									"id": {
+										"value": {
+											"value": "@{item().id}",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"WaterMark": {
+										"value": {
+											"value": "@{activity('GET  MAX BikeStore').output.FirstRow.MAXD}",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LinkS_Connection",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"ConfigTable": {
+				"type": "string",
+				"defaultValue": "configuration.ConfigTable"
+			}
+		},
+		"folder": {
+			"name": "EJ"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-07-31T03:17:37Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,66 @@
+{
+	"name": "Carga full - inabie",
+	"properties": {
+		"description": "ola",
+		"activities": [
+			{
+				"name": "Carga Datos Inabie",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT * FROM [dbo].[OferentesDirecciones] \nWHERE DireccionID > 2452",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "InabieProduccion",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableNameProduction": "OferentesDirecciones"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "INABIEDesarrollo",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableNameDev": "OferentesDirecciones"
+						}
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2022-11-04T18:06:19Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

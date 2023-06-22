@@ -1,0 +1,38 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "lee Tabla Config",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT \n\tID\n\t,LoadType\n\t,Source\n        ,Colunms\n\t,Destination\n\t,WatermarkValue\n\t,WatermarkColumn \nFROM [dbo].[ConfigurationTable]\nWHERE\n\tEnabled = 1",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "LocalDestinationJr",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableName": "dummy"
+						}
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2022-03-07T21:06:04Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

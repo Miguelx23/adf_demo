@@ -1,0 +1,28 @@
+{
+	"name": "DataSetBikeStoresDestination",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_BikeStores",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TableDestination": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@split(dataset().TableDestination,'.')[0]",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@split(dataset().TableDestination,'.')[1]",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

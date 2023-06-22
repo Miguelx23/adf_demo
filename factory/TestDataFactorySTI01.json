@@ -1,0 +1,9 @@
+{
+	"name": "TestDataFactorySTI01",
+	"location": "eastus2",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "003a3da2-4bc2-4045-84c9-ea041e211991",
+		"tenantId": "ed37866a-aff6-477b-a9fb-083ceca4c052"
+	}
+}

@@ -1,0 +1,6 @@
+{
+	"name": "DeiviLocal-IR",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}

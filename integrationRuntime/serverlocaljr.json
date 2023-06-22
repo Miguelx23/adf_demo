@@ -1,0 +1,6 @@
+{
+	"name": "serverlocaljr",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}

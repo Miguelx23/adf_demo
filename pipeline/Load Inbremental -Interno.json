@@ -1,0 +1,221 @@
+{
+	"name": "Load Inbremental -Interno",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get DestinationLT",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT * FROM @{pipeline().parameters.ConfigTable} IF @@ROWCOUNT = 0 THROW 50000,'No row in configuration table!',1",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SourceSaleLT",
+						"type": "DatasetReference",
+						"parameters": {
+							"TablenameSource": {
+								"value": "@{pipeline().parameters.ConfigTable}",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "For Each SourceSalesLT",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get DestinationLT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get DestinationLT').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "GET MAX SourceSalesLT",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT MAX(@{item().WatermarkColumn}) as maxd FROM @{item().SourceTable}",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "SourceSaleLT",
+									"type": "DatasetReference",
+									"parameters": {
+										"TablenameSource": {
+											"value": "@item().SourceTable",
+											"type": "Expression"
+										}
+									}
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "Copy data SourceSalesLT",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "GET MAX SourceSalesLT",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT @{item().Column} FROM @{item().SourceTable} \n \nWHERE @{item().WatermarkColumn} > '@{item().WatermarkValueDateTime}'\n\nAND \n\n@{item().WatermarkColumn} <= '@{activity('GET MAX SourceSalesLT').output.firstRow.MAXD}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SourceSaleLT",
+									"type": "DatasetReference",
+									"parameters": {
+										"TablenameSource": {
+											"value": "@{item().SourceTable}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DestinationEnmanuelLT",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableName": {
+											"value": "@{item().DestinationTable}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "UPDATE WATERMARK SourcesLT",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy data SourceSalesLT",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[EnmanuelL].[usp_UpdateWatermark]",
+								"storedProcedureParameters": {
+									"id": {
+										"value": {
+											"value": "@{item().ConfigTableID}",
+											"type": "Expression"
+										},
+										"type": "Int16"
+									},
+									"LastModifiedTime": {
+										"value": {
+											"value": "@{activity('GET MAX SourceSalesLT').output.firstRow.MAXD}",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabaseLinkedServer",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"ConfigTable": {
+				"type": "string",
+				"defaultValue": "[EnmanuelL].[ConfigTables]"
+			}
+		},
+		"folder": {
+			"name": "Tutorial-Interno-Por-EnLop"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-01-29T18:24:27Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

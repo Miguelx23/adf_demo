@@ -1,0 +1,28 @@
+{
+	"name": "AW19DataSet_SOURCE",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "CourseAW19Test",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TableNameSrc": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@split(dataset().TableNameSrc,'.')[0]",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@split(dataset().TableNameSrc,'.')[1]",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

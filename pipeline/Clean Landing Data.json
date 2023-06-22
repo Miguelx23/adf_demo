@@ -1,0 +1,175 @@
+{
+	"name": "Clean Landing Data",
+	"properties": {
+		"activities": [
+			{
+				"name": "For Each Entity",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.entities",
+						"type": "Expression"
+					},
+					"batchCount": 2,
+					"activities": [
+						{
+							"name": "Copy 2 Landing",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Delete1 files",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "celuladatos/@{'landing'}/yelp_data/@{item()}/"
+								},
+								{
+									"name": "Destination",
+									"value": "celuladatos/@{'raw'}/yelp_data/@{item()}/"
+								}
+							],
+							"typeProperties": {
+								"source": {
+									"type": "JsonSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": false,
+										"wildcardFolderPath": {
+											"value": "landing/yelp_data/@{item()}",
+											"type": "Expression"
+										},
+										"wildcardFileName": "*.json",
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "JsonReadSettings"
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles",
+										"blockSizeInMB": 50,
+										"metadata": [
+											{
+												"name": "CreatedBy",
+												"value": "Clean Landing Data"
+											},
+											{
+												"name": "EntityName",
+												"value": {
+													"value": "@{item()}",
+													"type": "Expression"
+												}
+											}
+										]
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "YelpDS",
+									"type": "DatasetReference",
+									"parameters": {
+										"EntityName": {
+											"value": "@{item()}",
+											"type": "Expression"
+										},
+										"Zone": "landing"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "YelpDS",
+									"type": "DatasetReference",
+									"parameters": {
+										"EntityName": {
+											"value": "@{item()}",
+											"type": "Expression"
+										},
+										"Zone": "raw"
+									}
+								}
+							]
+						},
+						{
+							"name": "Delete1 files",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "YelpDS",
+									"type": "DatasetReference",
+									"parameters": {
+										"EntityName": {
+											"value": "@item()",
+											"type": "Expression"
+										},
+										"Zone": "raw"
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": {
+										"value": "*.json",
+										"type": "Expression"
+									},
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"entities": {
+				"type": "array",
+				"defaultValue": [
+					"review",
+					"user",
+					"tip",
+					"checkin",
+					"covid_features",
+					"business"
+				]
+			}
+		},
+		"folder": {
+			"name": "Lily's-babies"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-04-20T20:17:20Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

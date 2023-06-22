@@ -1,0 +1,6 @@
+{
+	"name": "JrLocal",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}

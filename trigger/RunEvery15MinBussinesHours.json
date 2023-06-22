@@ -1,0 +1,29 @@
+{
+	"name": "RunEvery15MinBussinesHours",
+	"properties": {
+		"description": "This pipeline runs 15 minutes after the last one finishes.",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipeline": {
+			"pipelineReference": {
+				"referenceName": "Load Incremental",
+				"type": "PipelineReference"
+			},
+			"parameters": {
+				"ConfigTable": "EnmanuelL.ConfigTables"
+			}
+		},
+		"type": "TumblingWindowTrigger",
+		"typeProperties": {
+			"frequency": "Minute",
+			"interval": 15,
+			"startTime": "2021-09-14T21:04:00Z",
+			"delay": "00:00:00",
+			"maxConcurrency": 1,
+			"retryPolicy": {
+				"intervalInSeconds": 30
+			},
+			"dependsOn": []
+		}
+	}
+}

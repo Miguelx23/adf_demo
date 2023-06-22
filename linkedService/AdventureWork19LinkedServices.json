@@ -1,0 +1,16 @@
+{
+	"name": "AdventureWork19LinkedServices",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=False;data source=172.16.16.22;initial catalog=BodegaFinanciera;user id=integrationuserdwh",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIzY2UwMjAxOS1iZWYzLTQxOGMtYTQ1Zi1iYThjMWYzMzNmNGIiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "ELocal-IR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

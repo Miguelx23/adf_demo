@@ -1,0 +1,17 @@
+{
+	"name": "CxP_dataset_destino",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Sink_LS_CxC",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "prd",
+			"table": "View_MAESTRA_CLIENTES"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

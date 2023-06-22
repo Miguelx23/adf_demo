@@ -1,0 +1,19 @@
+{
+	"name": "SourceDataset_wmi",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage2jr",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "articles.csv",
+				"fileSystem": "prb1"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

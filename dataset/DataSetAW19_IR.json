@@ -1,0 +1,22 @@
+{
+	"name": "DataSetAW19_IR",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AdventureWork19LinkedServices",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"OrigenParametro": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "Production",
+			"table": "WorkOrderRouting"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

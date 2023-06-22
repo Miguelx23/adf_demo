@@ -1,0 +1,23 @@
+{
+	"name": "View_MAESTRA_PROVEEDORES_CxC",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLS_CXC",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": "Sheet1",
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "ProveedoresOfuscar.xlsx",
+				"folderPath": "ProveedoresOfuscar",
+				"container": "enmanuel"
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

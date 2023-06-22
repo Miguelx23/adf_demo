@@ -1,0 +1,17 @@
+{
+	"name": "MAESTRA_PROVEEDORES_DS_destino",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Sink_LS_CxC",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "prd",
+			"table": "ProveedoresOfuscar"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

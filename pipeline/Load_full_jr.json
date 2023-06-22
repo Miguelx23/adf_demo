@@ -1,0 +1,68 @@
+{
+	"name": "Load_full_jr",
+	"properties": {
+		"activities": [
+			{
+				"name": "transtation_to_localJr",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": false,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "LocalDestinationJr",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableName": "dummy"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "destinationdtlakejr",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "ADL-to-ADL_jr"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-03-07T21:06:04Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

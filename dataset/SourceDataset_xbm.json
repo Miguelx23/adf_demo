@@ -1,0 +1,18 @@
+{
+	"name": "SourceDataset_xbm",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage2jr",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "prb1"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,198 @@
+{
+	"name": "Load Incremental",
+	"properties": {
+		"activities": [
+			{
+				"name": "Until Available",
+				"description": "Until the server is up or retry counts are exceeded",
+				"type": "Until",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@or(greaterOrEquals(int(variables('RetryCounted')) ,  3) , variables('ServerIsUp') )",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Check Server Online",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "Set RetryCounted",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "select top 1 * from information_Schema.tables",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "SourceSaleLT",
+									"type": "DatasetReference",
+									"parameters": {
+										"TablenameSource": "informationschema.table"
+									}
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "Wait1",
+							"type": "Wait",
+							"dependsOn": [
+								{
+									"activity": "Set variable1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 10
+							}
+						},
+						{
+							"name": "Set RetryCounted",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "RetryCounted",
+								"value": {
+									"value": "@string(add(int(variables('RetryCount')), 1))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Check Server Online",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "RetryCount",
+								"value": {
+									"value": "@variables('RetryCounted')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set ServerIsUp",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Check Server Online",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "ServerIsUp",
+								"value": true
+							}
+						},
+						{
+							"name": "Execute Incremental Interno",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Set ServerIsUp",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Load Inbremental -Interno",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"ConfigTable": {
+										"value": "@pipeline().parameters.ConfigTable",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"ConfigTable": {
+				"type": "string",
+				"defaultValue": "[EnmanuelL].[ConfigTables]"
+			}
+		},
+		"variables": {
+			"RetryCount": {
+				"type": "String",
+				"defaultValue": "0"
+			},
+			"ServerIsUp": {
+				"type": "Boolean",
+				"defaultValue": false
+			},
+			"RetryCounted": {
+				"type": "String",
+				"defaultValue": "0"
+			}
+		},
+		"folder": {
+			"name": "Tutorial-Interno-Por-EnLop"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-01-29T18:24:28Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

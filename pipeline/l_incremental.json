@@ -1,0 +1,246 @@
+{
+	"name": "l_incremental",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get data in Configuration table",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT [Id]\n      ,[SRCName]\n      ,[SourceTable]\n      ,[DestinationTable]\n      ,[Columns]\n      ,[WatermarkColumn]\n      ,[WatermarkValueDateTime]\n      ,[Enable]\n  FROM @{pipeline().parameters.configTable}\n  WHERE Enable = 1 \n  IF @@ROWCOUNT = 0 THROW 50000,'No rows in configuration table!',1",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DataSetBikeStoresDestination",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableDestination": {
+								"value": "dummy.dummy",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Filter config",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Get data in Configuration table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get data in Configuration table').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(item().SRCName,'BikeStoresSources')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Filter config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Filter config').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Get max date",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT \n        MAX(@{item().WatermarkColumn}) as maxd\nFROM @{item().SourceTable}\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "BikeStoresSources",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableSource": {
+											"value": "@{item().SourceTable}",
+											"type": "Expression"
+										}
+									}
+								}
+							}
+						},
+						{
+							"name": "Load Data to dwh",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Get max date",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT \n            @{item().Columns} \n\nFROM @{item().SourceTable}\n\nWHERE @{item().WatermarkColumn} > convert(varchar, '@{item().WatermarkValueDateTime}', 20)\nAND \n\n@{item().WatermarkColumn} <= convert(varchar, '@{activity('Get max date').output.firstRow.MAXD}', 20)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"preCopyScript": {
+										"value": "TRUNCATE TABLE @{item().DestinationTable}",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "BikeStoresSources",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableSource": {
+											"value": "@{item().SourceTable}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DataSetBikeStoresDestination",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableDestination": {
+											"value": "@{item().DestinationTable}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Update watermark value datetime",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Load Data to dwh",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[configuration].[UpdateWaterMark]",
+								"storedProcedureParameters": {
+									"id": {
+										"value": {
+											"value": "@{item().Id}",
+											"type": "Expression"
+										},
+										"type": "Int16"
+									},
+									"watermark": {
+										"value": {
+											"value": "@{activity('Get max date').output.firstrow.MAXD}",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_BikeStores",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"configTable": {
+				"type": "string",
+				"defaultValue": "[configuration].[ConfigTable]"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-07-26T15:59:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

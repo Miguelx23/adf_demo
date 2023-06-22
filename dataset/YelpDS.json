@@ -1,0 +1,32 @@
+{
+	"name": "YelpDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "YelpBussinessLS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"EntityName": {
+				"type": "string"
+			},
+			"Zone": {
+				"type": "string",
+				"defaultValue": "Raw"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@{dataset().Zone}/yelp_data/@{dataset().EntityName}",
+					"type": "Expression"
+				},
+				"container": "celuladatos"
+			}
+		},
+		"schema": {}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
